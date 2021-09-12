@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-
+import 'package:intl/intl.dart';
 class NewTransaction extends StatefulWidget {
   final Function addnewtx;
 
@@ -12,14 +11,13 @@ class NewTransaction extends StatefulWidget {
 
 class _NewTransactionState extends State<NewTransaction> {
   void submitdata() {
-    if (titlecontroller.text.isEmpty || amountcontroller.text.isEmpty) {
+    if (titlecontroller.text.isEmpty || amountcontroller.text.isEmpty || selecteddate==null) {
       return;
     }
     widget.addnewtx(
       titlecontroller.text,
       double.parse(amountcontroller.text),
-
-      
+      selecteddate
     );
 
     Navigator.of(context).pop();
@@ -28,6 +26,23 @@ class _NewTransactionState extends State<NewTransaction> {
   final titlecontroller = TextEditingController();
 
   final amountcontroller = TextEditingController();
+  DateTime selecteddate;
+
+  void presentdatepicker() {
+    showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2021),
+            lastDate: DateTime.now())
+        .then((pickeddate) {
+      if (pickeddate == null) {
+        return;
+      }
+      setState(() {
+        selecteddate = pickeddate;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +67,20 @@ class _NewTransactionState extends State<NewTransaction> {
               decoration: InputDecoration(labelText: 'Item Amount'),
               controller: amountcontroller,
               keyboardType: TextInputType.number,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selecteddate == null ? 'No date chosen' : DateFormat.yMMMEd().format(selecteddate),
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ),
+                FlatButton(
+                    onPressed: presentdatepicker,
+                    child: Text('Choose date here',
+                        style: TextStyle(color: Colors.deepOrange)))
+              ],
             ),
             FlatButton(
               onPressed: submitdata,

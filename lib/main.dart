@@ -1,5 +1,5 @@
 import './widgets/new_transaction.dart';
-
+import './widgets/chart.dart';
 import 'classes/transaction.dart';
 import 'package:flutter/material.dart';
 import './widgets/transaction_list.dart';
@@ -32,19 +32,36 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> transaction = [];
 
-  void addnewtransaction(String title, double amount) {
+  void addnewtransaction(String title, double amount, DateTime chosendate) {
     final newtx =
-        Transaction(DateTime.now().toString(), title, amount, DateTime.now());
+        Transaction(DateTime.now().toString(), title, amount, chosendate);
 
     setState(() {
       usertransactions.add(newtx);
     });
   }
 
+  void deletetransaction(String id) {
+    setState(() {
+      usertransactions.removeWhere((tx) => tx.id == id);
+    });
+  }
+
   final List<Transaction> usertransactions = [
-   // Transaction('i1', 'Shirt', 200, DateTime.now()),
+    // Transaction('i1', 'Shirt', 200, DateTime.now()),
     //Transaction('i2', 'T-Shirt', 600, DateTime.now()),
   ];
+  List<Transaction> get recentransaction {
+    return usertransactions.where(
+      (tx) {
+        return tx.date.isAfter(
+          DateTime.now().subtract(
+            Duration(days: 7),
+          ),
+        );
+      },
+    ).toList();
+  }
 
   void startnewtrx(BuildContext ctx) {
     showModalBottomSheet(
@@ -59,8 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
-        title: Text('Expense App',style: TextStyle(fontSize: 21,fontWeight: FontWeight.w700 ),),
+        title: Text(
+          'Expense App',
+          style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -73,13 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Container(
-              width: double.infinity,
-              child: Card(
-                child: Text('chart'),
-              ),
-            ),
-            TransactionList(usertransactions)
+            Chart(recentransaction),
+            TransactionList(usertransactions, deletetransaction)
           ],
         ),
       ),
